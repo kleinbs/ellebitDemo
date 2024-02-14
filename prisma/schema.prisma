@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Partner {
+  id        Int             @id @default(autoincrement())
+  name      String          @unique
+  contact   PartnerContact?
+  menus     Menu[]
+  order     Order[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model PartnerContact {
+  id        Int      @id @default(autoincrement())
+  partner   Partner  @relation(fields: [partnerId], references: [id])
+  partnerId Int      @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Menu {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String?
+  partner     Partner    @relation(fields: [partnerId], references: [id])
+  partnerId   Int
+  menuItems   MenuItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model MenuItem {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  price       Float
+  imageName   String?
+  menu        Menu     @relation(fields: [menuId], references: [id])
+  menuId      Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  fieldType   FieldType @default(TEXTFIELD)
+}
+
+model Order {
+  id                        String      @id @unique
+  partner                   Partner     @relation(fields: [partnerId], references: [id])
+  partnerId                 Int
+  contactName               String
+  contactEmail              String
+  contactPhone              Int
+  contactAddressLine1       String?
+  contactAddressLine2       String?
+  contactAddressCity       String?
+  contactAddressState       String?
+  contactAddressCountry    String?
+  contactAddressPostalCode  Int?
+  eventDate                 DateTime?
+  eventAttendeeCount        Int?
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+  closedAt                  DateTime?
+  completeBy                DateTime?
+}
+
+enum FieldType {
+  TEXTFIELD
+}
